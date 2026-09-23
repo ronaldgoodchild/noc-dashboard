@@ -19,6 +19,12 @@ pip install -r web/requirements.txt
 python web/noc_web.py
 ```
 
+Web launch-option tests (use the same environment with Flask installed):
+```
+python -m unittest discover -s tests -v
+```
+These use temporary synthetic settings and do not start monitoring real targets.
+
 ## Ground rules
 - Never include real credentials, IP addresses, share names, logs or personal data in issues or PRs.
 - Be kind - we follow the [Code of Conduct](CODE_OF_CONDUCT.md).
