@@ -48,8 +48,15 @@ python desktop\noc_dashboard.py
 **Web:**
 ```bash
 pip install -r web/requirements.txt
-python web/noc_web.py        # then open http://localhost:5000
+python web/noc_web.py        # then open http://localhost:8082
+python web/noc_web.py --host 127.0.0.1 --port 9000  # local access on port 9000
 ```
+`--port` takes precedence over `NOC_PORT`, then the `port` in
+`web/noc_settings.json`, then the default `8082`. Ports must be integers from
+1 to 65535. `--host` defaults to `0.0.0.0` (all interfaces); use `127.0.0.1` for
+local-only access. These launch options do not rewrite saved settings.
+Run `python web/noc_web.py --help` to see the options without starting the app.
+
 On first run the web app **generates a random admin password** and prints it in the console (also saved to `noc_settings.json` - change it under Settings). Copy `web/noc_servers.example.json` to `web/noc_servers.json` and edit it to list your own servers.
 
 **Agent** (on each PC you want CPU/RAM/disk stats from): `pip install psutil` then `python web/noc_agent.py` - it prints an API key on first run to paste into the server card.
