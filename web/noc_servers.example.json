@@ -1,0 +1,59 @@
+[
+  {
+    "group": "Servers",
+    "description": "Example file server",
+    "name": "File Server",
+    "ip": "192.168.1.10",
+    "connections": [
+      {
+        "type": "SMB",
+        "port": 445
+      },
+      {
+        "type": "HTTPS",
+        "port": 443
+      }
+    ],
+    "manage_url": "https://192.168.1.10",
+    "manage_label": "Admin",
+    "tags": [
+      "files",
+      "example"
+    ],
+    "mac": "",
+    "api_key": "",
+    "icon": "server",
+    "show_sysmon": false,
+    "card_color": "#3b82f6",
+    "notes": "Replace with your own servers",
+    "favorite": true,
+    "shares": [],
+    "hosts": []
+  },
+  {
+    "group": "Network",
+    "description": "Example router",
+    "name": "Router",
+    "ip": "192.168.1.1",
+    "connections": [
+      {
+        "type": "HTTP",
+        "port": 80
+      }
+    ],
+    "manage_url": "http://192.168.1.1",
+    "manage_label": "Router UI",
+    "tags": [
+      "network"
+    ],
+    "mac": "",
+    "api_key": "",
+    "icon": "router",
+    "show_sysmon": false,
+    "card_color": "#22c55e",
+    "notes": "",
+    "favorite": false,
+    "shares": [],
+    "hosts": []
+  }
+]

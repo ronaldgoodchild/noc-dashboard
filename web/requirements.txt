@@ -1,0 +1,3 @@
+flask>=3.0
+psutil>=5.9        # noc_agent.py / noc_local.py / noc_sysmon.py
+speedtest-cli>=2.1  # optional: speed test tile

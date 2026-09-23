@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+*.exe
+build/
+dist/
+*.spec
+
+# Runtime data - never commit (server lists, credentials, SMS/email settings, logs)
+noc_config*.json
+noc_settings.json
+noc_servers.json
+noc_sms*.json
+noc_status*.json
+noc_agent_settings.json
+noc_events*.log
+backups/
+*.log
