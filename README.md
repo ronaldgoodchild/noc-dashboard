@@ -13,6 +13,9 @@ Plus light **agents** in [`web/`](web/) that report CPU / RAM / disks / processe
 
 ## Screenshots
 
+![Demo](docs/screenshots/demo.gif)
+*Web edition: live monitoring, light/dark theme, card and list views, live ping*
+
 ![Desktop edition (Tkinter) - sample targets](docs/screenshots/desktop.png)
 *Desktop edition (Tkinter) - sample targets*
 
