@@ -49,7 +49,7 @@ On first run the web app **generates a random admin password** and prints it in 
 
 ## Launching other REGTeches tools
 
-The desktop app can launch [DriveMapper Pro](https://github.com/ronaldgoodchild/drivemapper-pro), [BackupPro](https://github.com/ronaldgoodchild/backuppro), [Tech Sentinel Monitor](https://github.com/ronaldgoodchild/tech-sentinel-monitor), [Technician's Toolkit](https://github.com/ronaldgoodchild/technicians-toolkit), [AppForge](https://github.com/ronaldgoodchild/appforge) and [Nmap Studio](https://github.com/ronaldgoodchild/cyberscan) if you clone them next to this repo (or set `REGTECHES_TOOLS_DIR`).
+The desktop app can launch [DriveMapper Pro](https://github.com/ronaldgoodchild/drivemapper-pro), [BackupPro](https://github.com/ronaldgoodchild/backuppro), [Tech Sentinel Monitor](https://github.com/ronaldgoodchild/tech-sentinel-monitor), [Technician's Toolkit](https://github.com/ronaldgoodchild/technicians-toolkit), [AppForge](https://github.com/ronaldgoodchild/appforge) and [Nmap Studio](https://github.com/ronaldgoodchild/cyberscan), [REGWinTool](https://github.com/ronaldgoodchild/regwintool) if you clone them next to this repo (or set `REGTECHES_TOOLS_DIR`).
 
 ## Contributing
 

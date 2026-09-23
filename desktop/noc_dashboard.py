@@ -125,7 +125,7 @@ REGTECHES_TOOLS = [
     ("\U0001F9F0  Technician's Toolkit", _tool("technicians-toolkit", "technicians_toolkit.py")),
     ("\U0001F4E6  AppForge", _tool("appforge", "appforge.py")),
     ("\U0001F4E1  Nmap Studio", _tool("cyberscan", "tools", "nmap_studio.py")),
-    ("\U0001F527  REGWinTool", _tool("windows-admin-tools", "regwintool.py")),
+    ("\U0001F527  REGWinTool", _tool("regwintool", "regwintool.py")),
 ]
 
 DEFAULT_NODES = [
