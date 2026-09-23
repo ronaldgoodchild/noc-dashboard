@@ -11,6 +11,14 @@ A free, self-hosted **Network Operations Center** for home labs and small IT sho
 
 Plus light **agents** in [`web/`](web/) that report CPU / RAM / disks / processes from any Windows or Linux PC.
 
+## Screenshots
+
+![Desktop edition (Tkinter) - sample targets](docs/screenshots/desktop.png)
+*Desktop edition (Tkinter) - sample targets*
+
+![Web edition (Flask) - sample targets](docs/screenshots/web.png)
+*Web edition (Flask) - sample targets*
+
 ## Features
 
 - Real-time ping monitoring (15 s to 10 min), uptime %, latency sparklines
@@ -30,6 +38,7 @@ Plus light **agents** in [`web/`](web/) that report CPU / RAM / disks / processe
 ```powershell
 git clone https://github.com/ronaldgoodchild/noc-dashboard.git
 cd noc-dashboard
+copy desktop\noc_config.example.json desktop\noc_config.json   # sample targets
 python desktop\noc_dashboard.py
 ```
 

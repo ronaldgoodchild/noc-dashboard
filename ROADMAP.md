@@ -3,7 +3,7 @@
 Comment on (or open) an issue first so we don't duplicate work.
 
 ## Good first issues
-- [ ] Add screenshots of both editions to the README (use sample data, no real IPs)
+- [x] Add screenshots of both editions to the README (use sample data, no real IPs)
 - [ ] Split `noc_web.py` (~5,000 lines with embedded HTML/JS) into templates + static files
 - [ ] Add a tested `Dockerfile` / `docker-compose.yml` for the web edition
 - [ ] Add a `--port` / `--host` command-line option to the web app
