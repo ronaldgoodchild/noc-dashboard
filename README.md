@@ -22,6 +22,12 @@ Plus light **agents** in [`web/`](web/) that report CPU / RAM / disks / processe
 ![Web edition (Flask) - sample targets](docs/screenshots/web.png)
 *Web edition (Flask) - sample targets*
 
+## Download (Windows desktop edition)
+
+Grab **NOC-Dashboard-2.5.0-win64.exe** from the [latest release](https://github.com/ronaldgoodchild/noc-dashboard/releases/latest) - no Python needed.
+
+The EXE is unsigned, so Windows SmartScreen or your antivirus may warn about it. Verify the download against the `.sha256` file on the release (`certutil -hashfile <file> SHA256`), or run it from source as described below.
+
 ## Features
 
 - Real-time ping monitoring (15 s to 10 min), uptime %, latency sparklines

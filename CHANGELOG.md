@@ -3,6 +3,7 @@
 Reconstructed from the original development history (March - June 2026).
 
 ## [Unreleased]
+- Windows desktop EXE (2.5.0) published on the Releases page with SHA-256.
 - Security: web edition no longer ships default `admin` / `changeme` credentials or a fixed session key - random ones are generated on first run and saved to `noc_settings.json`
 - Desktop tool launcher uses portable paths (sibling folders or `REGTECHES_TOOLS_DIR`) instead of `C:\code\...`
 - Example server list added; example IPs use the 192.168.1.x documentation range
