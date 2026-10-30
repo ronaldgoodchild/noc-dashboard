@@ -38,14 +38,17 @@ APP_VERSION = "5.12.0"
 APP_AUTHOR  = "Ronald Goodchild"
 
 _SCRIPT_DIR     = os.path.dirname(os.path.abspath(__file__))
-SETTINGS_FILE   = os.path.join(_SCRIPT_DIR, "noc_settings.json")
-SERVERS_FILE    = os.path.join(_SCRIPT_DIR, "noc_servers.json")
-SMS_CONFIG_FILE = os.path.join(_SCRIPT_DIR, "noc_sms.json")
-LOG_FILE        = os.path.join(_SCRIPT_DIR, "noc_events.log")
-
-# Status file lives next to the script on Windows; override via NOC_DATA_DIR env var
-DATA_DIR    = os.environ.get("NOC_DATA_DIR", _SCRIPT_DIR)
+# Runtime data lives next to the script by default; set NOC_DATA_DIR (e.g. a Docker volume) to relocate it
+DATA_DIR        = os.environ.get("NOC_DATA_DIR", _SCRIPT_DIR)
+SETTINGS_FILE   = os.path.join(DATA_DIR, "noc_settings.json")
+SERVERS_FILE    = os.path.join(DATA_DIR, "noc_servers.json")
+SMS_CONFIG_FILE = os.path.join(DATA_DIR, "noc_sms.json")
+LOG_FILE        = os.path.join(DATA_DIR, "noc_events.log")
 STATUS_FILE = os.path.join(DATA_DIR, "noc_status.json")
+try:
+    os.makedirs(DATA_DIR, exist_ok=True)
+except OSError:
+    pass  # data directory unavailable on this platform - non-fatal
 
 # ─── Load noc_settings.json ──────────────────────────────────────────────────
 def _load_app_settings():

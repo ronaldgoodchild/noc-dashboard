@@ -1,0 +1,12 @@
+.git
+.github
+**/__pycache__
+**/*.pyc
+web/noc_settings.json
+web/noc_servers.json
+web/noc_sms.json
+web/noc_status.json
+web/noc_events.log
+desktop
+docs
+tests

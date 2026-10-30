@@ -63,6 +63,13 @@ python web/noc_web.py --host 127.0.0.1 --port 9000  # local access on port 9000
 local-only access. These launch options do not rewrite saved settings.
 Run `python web/noc_web.py --help` to see the options without starting the app.
 
+**Docker:**
+```bash
+docker compose up -d --build     # then open http://localhost:8082
+docker compose logs noc          # first run prints the generated admin password here
+```
+Settings, the server list, logs and status are kept in the `noc-data` volume (`/data` in the container, set via `NOC_DATA_DIR`). To start from your own server list, uncomment the `noc_servers.json` bind mount in `docker-compose.yml`. Use `network_mode: host` instead of `ports` if you need to reach hosts that are only visible on the Docker host's network.
+
 On first run the web app **generates a random admin password** and prints it in the console (also saved to `noc_settings.json` - change it under Settings). Copy `web/noc_servers.example.json` to `web/noc_servers.json` and edit it to list your own servers.
 
 **Agent** (on each PC you want CPU/RAM/disk stats from): `pip install psutil` then `python web/noc_agent.py` - it prints an API key on first run to paste into the server card.

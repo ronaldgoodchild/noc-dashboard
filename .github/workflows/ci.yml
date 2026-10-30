@@ -14,3 +14,21 @@ jobs:
         run: pip install -r web/requirements.txt
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build image
+        run: docker build -t noc-dashboard:ci .
+      - name: Start container and check the login page
+        run: |
+          docker run -d --name noc -p 8082:8082 noc-dashboard:ci
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8082/login || true)
+            [ "$code" = "200" ] && exit 0
+            sleep 1
+          done
+          docker logs noc
+          exit 1
+      - name: Validate compose file
+        run: docker compose config -q
