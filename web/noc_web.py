@@ -6,6 +6,7 @@ Runs on ZimaOS as a Docker container and windows stand a lone with host networki
 """
 
 import os
+import re
 import argparse
 import sys
 import json
@@ -479,24 +480,24 @@ def ping_host(host, timeout=PING_TIMEOUT):
     """Ping via ICMP using system ping command. Returns (online, ms)."""
     import subprocess
     host = host.split(":")[0] if ":" in host and not host.startswith("[") else host
+    if sys.platform == "win32":
+        cmd = ["ping", "-n", "1", "-w", str(int(timeout * 1000)), host]  # -w is milliseconds
+    else:
+        cmd = ["ping", "-c", "1", "-W", str(timeout), host]
     try:
-        # Linux ping syntax
-        result = subprocess.run(
-            ["ping", "-c", "1", "-W", str(timeout), host],
-            capture_output=True, text=True, timeout=timeout + 2
-        )
-        if result.returncode == 0:
-            # Parse ms from output
-            out = result.stdout
-            for line in out.splitlines():
-                if "time=" in line:
-                    try:
-                        ms_str = line.split("time=")[1].split()[0].replace("ms", "")
-                        return True, max(1, int(float(ms_str)))
-                    except (ValueError, IndexError):
-                        return True, 1
-            return True, 1
-        return False, 0
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout + 2)
+        out = result.stdout
+        if result.returncode != 0:
+            return False, 0
+        # Windows exits 0 for "Destination host unreachable" replies from a router;
+        # a real echo reply always carries a TTL.
+        if sys.platform == "win32" and "ttl=" not in out.lower():
+            return False, 0
+        for line in out.splitlines():
+            m = re.search(r"time\s*([=<])\s*([\d.]+)\s*ms", line, re.IGNORECASE)
+            if m:
+                return True, max(1, int(float(m.group(2))))
+        return True, 1
     except Exception:
         return False, 0
 

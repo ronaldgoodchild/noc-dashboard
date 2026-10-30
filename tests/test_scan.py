@@ -43,7 +43,8 @@ class TestPingHost(unittest.TestCase):
             self.assertEqual(noc_web.ping_host("127.0.0.1"), (True, 1))
 
     def test_success_without_time_field_is_online(self):
-        with mock.patch("subprocess.run", return_value=self._result(0, "reply received\n")):
+        with mock.patch.object(noc_web.sys, "platform", "linux"), \
+                mock.patch("subprocess.run", return_value=self._result(0, "reply received\n")):
             self.assertEqual(noc_web.ping_host("10.0.0.1"), (True, 1))
 
     def test_nonzero_exit_is_offline(self):
@@ -54,6 +55,31 @@ class TestPingHost(unittest.TestCase):
         for exc in (subprocess.TimeoutExpired("ping", 1), FileNotFoundError()):
             with mock.patch("subprocess.run", side_effect=exc):
                 self.assertEqual(noc_web.ping_host("10.0.0.1"), (False, 0))
+
+    def _windows(self, out, returncode=0):
+        return (mock.patch.object(noc_web.sys, "platform", "win32"),
+                mock.patch("subprocess.run", return_value=self._result(returncode, out)))
+
+    def test_windows_command_and_output(self):
+        plat, run = self._windows("Reply from 10.0.0.1: bytes=32 time=14ms TTL=64\n")
+        with plat, run as r:
+            self.assertEqual(noc_web.ping_host("10.0.0.1", timeout=2), (True, 14))
+        self.assertEqual(r.call_args[0][0], ["ping", "-n", "1", "-w", "2000", "10.0.0.1"])
+
+    def test_windows_sub_millisecond(self):
+        plat, run = self._windows("Reply from 127.0.0.1: bytes=32 time<1ms TTL=128\n")
+        with plat, run:
+            self.assertEqual(noc_web.ping_host("127.0.0.1"), (True, 1))
+
+    def test_windows_unreachable_reply_is_offline(self):
+        plat, run = self._windows("Reply from 192.168.1.1: Destination host unreachable.\n")
+        with plat, run:
+            self.assertEqual(noc_web.ping_host("10.0.0.9"), (False, 0))
+
+    def test_linux_command(self):
+        with mock.patch.object(noc_web.sys, "platform", "linux"),                 mock.patch("subprocess.run", return_value=self._result(1)) as run:
+            noc_web.ping_host("10.0.0.1", timeout=2)
+        self.assertEqual(run.call_args[0][0], ["ping", "-c", "1", "-W", "2", "10.0.0.1"])
 
     def test_port_suffix_is_stripped_from_host(self):
         with mock.patch("subprocess.run", return_value=self._result(1)) as run:
