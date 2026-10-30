@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📡 REGTeches NOC Dashboard</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+
+<!-- Header -->
+<div class="header" id="mainHeader">
+
+    <!-- Zone 1: Brand -->
+    <div class="header-brand">
+        <div class="header-signal">📡</div>
+        <div class="header-brand-text">
+            <h1>REGTECHES NOC</h1>
+            <div class="header-meta">
+                <span class="header-version">v{{ app_version }}</span>
+                <span class="header-sep">·</span>
+                <span class="header-author">Ronald Goodchild</span>
+                <span class="header-sep">·</span>
+                <span class="header-copy">© 2026 REGTeches</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-vdivider"></div>
+
+    <!-- Zone 2: Live Status -->
+    <div class="header-status">
+        <div class="hstat">
+            <span class="hstat-val" id="hstat-online">—/—</span>
+            <span class="hstat-lbl">Online</span>
+        </div>
+        <div class="hstat-sep"></div>
+        <div class="hstat">
+            <span class="hstat-val" id="hstat-offline">—</span>
+            <span class="hstat-lbl">Offline</span>
+        </div>
+        <div class="hstat-sep"></div>
+        <div class="hstat">
+            <span class="hstat-val" id="hstat-maint">—</span>
+            <span class="hstat-lbl">Maint</span>
+        </div>
+        <div class="hstat-sep"></div>
+        <div class="hstat">
+            <span class="hstat-val" id="countdown">—</span>
+            <span class="hstat-lbl">Next Scan</span>
+        </div>
+    </div>
+
+    <div class="header-vdivider"></div>
+
+    <!-- Zone 3: Actions -->
+    <div class="header-right">
+        <button class="btn btn-primary" onclick="forceRefresh()">🔄 Refresh</button>
+        <button class="btn btn-outline" onclick="toggleLog()">📋 Log</button>
+        <button class="btn btn-outline" id="themeToggle" onclick="toggleTheme()" title="Toggle light / dark mode">🌙</button>
+        <button class="btn btn-outline" onclick="showAddServer()">➕ Add Server</button>
+        <div class="setup-dropdown">
+            <button class="btn btn-outline" onclick="toggleSetupMenu(event)">⚙️ Setup ▾</button>
+            <div class="setup-menu" id="setupMenu">
+                <button class="setup-item" onclick="showAppSettings();closeSetupMenu()">🛠️ App Settings</button>
+                <button class="setup-item" onclick="showNotifications();closeSetupMenu()">🔔 Notifications</button>
+                <button class="setup-item" onclick="showBackupRestore();closeSetupMenu()">💾 Backup &amp; Restore</button>
+                <button class="setup-item" onclick="runSpeedTest();closeSetupMenu()">🚀 Speed Test</button>
+                <button class="setup-item" onclick="showNetworkScan();closeSetupMenu()">🔭 Network Discovery</button>
+                <hr class="setup-divider">
+                <button class="setup-item" onclick="showExportImport();closeSetupMenu()">📤 Import / Export</button>
+            </div>
+        </div>
+        <a href="/logout" class="btn btn-danger" style="text-decoration:none;">🚪 Logout</a>
+    </div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+    <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search servers, IPs, tags, descriptions..." oninput="filterCards()">
+    <select class="tag-filter" id="tagFilter" onchange="filterCards()">
+        <option value="">All Servers</option>
+    </select>
+    <button class="btn btn-outline btn-sm" id="collapseAllBtn" onclick="toggleAllGroups()" title="Collapse / Expand all groups">⊟ Groups</button>
+    <button class="btn btn-outline btn-sm" id="viewToggleBtn" onclick="toggleViewMode()" title="Toggle card / list view">🃏 Cards</button>
+    <button class="btn btn-outline btn-sm" id="bulkModeBtn" onclick="toggleBulkMode()" title="Select multiple servers">☑ Select</button>
+    <span style="font-size:0.75rem;color:var(--text-dim);" id="lastCheck"></span>
+</div>
+
+<!-- Bulk Action Bar -->
+<div class="bulk-bar" id="bulkBar">
+    <span><span class="bulk-count" id="bulkCount">0</span> selected</span>
+    <button class="btn btn-sm btn-outline" onclick="bulkSelectAll()">Select All</button>
+    <button class="btn btn-sm btn-outline" onclick="bulkClear()">Clear</button>
+    <span style="width:1px;height:20px;background:var(--card-border);margin:0 0.25rem;"></span>
+    <button class="btn btn-sm btn-outline" onclick="bulkMoveGroup()">📁 Move to Group</button>
+    <button class="btn btn-sm btn-outline" onclick="bulkMaintenance('enter')">🔧 Maintenance ON</button>
+    <button class="btn btn-sm btn-outline" onclick="bulkMaintenance('exit')">✅ Maintenance OFF</button>
+    <button class="btn btn-sm btn-danger"  onclick="bulkDelete()">🗑️ Delete Selected</button>
+    <span style="margin-left:auto;">
+        <button class="btn btn-sm btn-outline" onclick="toggleBulkMode()">✕ Cancel</button>
+    </span>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+    <div class="groups-area" id="cardsArea"></div>
+    <div class="log-panel" id="logPanel">
+        <div class="log-header">
+            📋 Activity Log
+            <button class="btn btn-sm btn-outline" onclick="clearLogDisplay()">Clear</button>
+        </div>
+        <div class="log-entries" id="logEntries"></div>
+    </div>
+</div>
+
+<!-- Modals will be injected here -->
+<div id="modalContainer"></div>
+
+<script>
+const APP_VERSION = "{{ app_version }}";
+const SCAN_INTERVAL = {{ scan_interval }};
+</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
