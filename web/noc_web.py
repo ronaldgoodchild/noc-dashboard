@@ -6,6 +6,7 @@ Runs on ZimaOS as a Docker container and windows stand a lone with host networki
 """
 
 import os
+import argparse
 import sys
 import json
 import time
@@ -57,6 +58,37 @@ def _load_app_settings():
     return {}
 
 _cfg = _load_app_settings()
+
+
+def _port_number(value):
+    try:
+        port = int(value)
+    except (TypeError, ValueError) as exc:
+        raise argparse.ArgumentTypeError("port must be an integer from 1 to 65535") from exc
+    if not 1 <= port <= 65535:
+        raise argparse.ArgumentTypeError("port must be an integer from 1 to 65535")
+    return port
+
+
+def _parse_bind_args(argv=None):
+    parser = argparse.ArgumentParser(description="Run the NOC web dashboard")
+    parser.add_argument("--host", default="0.0.0.0",
+                        help="address to bind (default: 0.0.0.0; use 127.0.0.1 for local access)")
+    parser.add_argument("--port", type=_port_number,
+                        help="listening port (overrides NOC_PORT, then settings, then 8082)")
+    args = parser.parse_args(argv)
+    if not args.host.strip():
+        parser.error("--host must not be empty")
+    if args.port is None:
+        try:
+            args.port = _port_number(os.environ.get("NOC_PORT", _cfg.get("port", 8082)))
+        except argparse.ArgumentTypeError as exc:
+            parser.error(str(exc))
+    return args
+
+
+# Help and invalid options must exit before credentials or scanner state are created.
+_startup_options = _parse_bind_args() if __name__ == "__main__" else None
 
 def _bootstrap_credentials(cfg):
     """First run: replace missing/default credentials with random ones and save them.
@@ -4868,7 +4900,8 @@ async function showBackupRestore() {
 
 # ─── Main ────────────────────────────────────────────────────────────────────
 
-def main():
+def main(options=None):
+    options = options if options is not None else _parse_bind_args()
     try:
         os.makedirs(DATA_DIR, exist_ok=True)
     except OSError:
@@ -4881,10 +4914,8 @@ def main():
     scanner = threading.Thread(target=scan_loop, daemon=True)
     scanner.start()
 
-    # Run Flask — port from noc_settings.json, then env var, then default
-    port = int(os.environ.get("NOC_PORT", _cfg.get("port", 8082)))
-    app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
+    app.run(host=options.host, port=options.port, debug=False, threaded=True)
 
 
 if __name__ == "__main__":
-    main()
+    main(_startup_options)
