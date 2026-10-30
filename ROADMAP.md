@@ -7,7 +7,7 @@ Comment on (or open) an issue first so we don't duplicate work.
 - [x] Split `noc_web.py` (~5,000 lines with embedded HTML/JS) into templates + static files
 - [ ] Add a tested `Dockerfile` / `docker-compose.yml` for the web edition
 - [ ] Add a `--port` / `--host` command-line option to the web app
-- [ ] Unit tests for the ping/uptime logic
+- [x] Unit tests for the ping/uptime logic
 
 ## Security
 - [ ] Encrypt saved share and SMTP credentials (Windows Credential Manager / keyring / Fernet)
