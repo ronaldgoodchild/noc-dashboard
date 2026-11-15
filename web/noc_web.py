@@ -197,6 +197,7 @@ sms_cooldowns = {}
 scan_running = False
 scan_lock = threading.Lock()
 service_stats = {}        # ip_key -> list of {val, lbl} for inline card display
+metrics_history = deque(maxlen=576)   # Overview time-series, one point per scan (576 x 30s = ~4.8h)
 
 
 # ─── Config Persistence ─────────────────────────────────────────────────────
@@ -651,6 +652,9 @@ def do_scan():
         # Write backwards-compatible JSON for PHP NOC page
         _write_status_json(results, now_str)
 
+        # Record one point for the Overview graphs
+        _record_metrics_snapshot()
+
         # Check maintenance timers
         expired = []
         for ip, timer in maintenance_timers.items():
@@ -669,6 +673,46 @@ def do_scan():
     finally:
         with scan_lock:
             scan_running = False
+
+
+def _compute_overview():
+    """Counts and response-time stats computed from the current global state."""
+    online = offline = maint = 0
+    online_ms = []
+    for node in nodes:
+        ip = node.get("ip", "")
+        if ip in maintenance_ips:
+            maint += 1
+            continue
+        status = node_statuses.get(ip, {})
+        if status.get("online"):
+            online += 1
+            if isinstance(status.get("ms"), (int, float)):
+                online_ms.append(status["ms"])
+        else:
+            offline += 1
+    total = len(nodes)
+    health = "good" if offline == 0 else ("warn" if online > 0 else "bad")
+    return {
+        "online": online, "offline": offline, "maintenance": maint, "total": total,
+        "health": health,
+        "avg_ms": round(sum(online_ms) / len(online_ms), 1) if online_ms else None,
+    }
+
+
+def _record_metrics_snapshot():
+    """Append a compact time-series point for the Overview graphs."""
+    try:
+        ov = _compute_overview()
+        metrics_history.append({
+            "ts":      datetime.now().strftime("%H:%M"),
+            "online":  ov["online"],
+            "offline": ov["offline"],
+            "total":   ov["total"],
+            "avg_ms":  ov["avg_ms"],
+        })
+    except Exception:
+        pass
 
 
 def _write_status_json(results, timestamp):
@@ -1497,6 +1541,40 @@ def logout():
 @login_required
 def dashboard():
     return render_template("dashboard.html", app_version=APP_VERSION, scan_interval=SCAN_INTERVAL)
+
+
+@app.route("/overview")
+@login_required
+def overview():
+    """Overview page: KPI tiles and graphs (status, servers online over time, response times)."""
+    return render_template("overview.html", app_version=APP_VERSION, scan_interval=SCAN_INTERVAL)
+
+
+@app.route("/api/overview")
+@login_required
+def api_overview():
+    """Data for the Overview page: current KPIs plus time-series history."""
+    ov = _compute_overview()
+    node_list = []
+    for node in nodes:
+        ip = node.get("ip", "")
+        st = node_statuses.get(ip, {})
+        node_list.append({
+            "name": node.get("name", ip),
+            "group": node.get("group", "Ungrouped"),
+            "online": bool(st.get("online", False)),
+            "ms": st.get("ms", 0),
+            "in_maintenance": ip in maintenance_ips,
+        })
+    return jsonify({
+        "summary": {
+            **ov,
+            "last_scan": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "scan_interval": SCAN_INTERVAL,
+        },
+        "metrics_history": list(metrics_history),
+        "nodes": node_list,
+    })
 
 
 @app.route("/api/status")

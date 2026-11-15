@@ -1,0 +1,55 @@
+/* Overview page: layered on top of dashboard.css (theme variables, header, buttons) */
+body.overview-page {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;   /* dashboard.css locks the body; the Overview page scrolls normally */
+}
+.overview-page .header-status { flex: 1; justify-content: flex-start; }
+
+.health-pill {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.3rem 0.8rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+    border: 1px solid var(--card-border);
+}
+.health-pill.good { color: var(--green);  background: rgba(34,197,94,0.14);  border-color: rgba(34,197,94,0.4); }
+.health-pill.warn { color: var(--yellow); background: rgba(234,179,8,0.14);  border-color: rgba(234,179,8,0.4); }
+.health-pill.bad  { color: var(--red);    background: rgba(239,68,68,0.16);  border-color: rgba(239,68,68,0.45); }
+
+.ov-main { padding: 1.2rem 1.4rem 2rem; max-width: 1400px; width: 100%; margin: 0 auto; }
+.ov-sub { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1rem; }
+.ov-sub h2 { font-size: 1.1rem; }
+.ov-updated { font-size: 0.75rem; color: var(--text-dim); }
+
+.kpi-grid {
+    display: grid; gap: 0.8rem; margin-bottom: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+.kpi {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 10px; padding: 0.8rem 1rem;
+}
+.kpi-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); }
+.kpi-val {
+    font-size: 1.8rem; font-weight: 700; margin-top: 0.2rem;
+    font-family: 'Consolas', 'Monaco', monospace; transition: color 0.4s ease;
+}
+.kpi-val .unit { font-size: 0.85rem; font-weight: 500; color: var(--text-dim); }
+
+.chart-grid {
+    display: grid; gap: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+.chart-card {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 10px; padding: 0.8rem 1rem;
+}
+.chart-wide { grid-column: span 2; }
+.chart-card h3 { font-size: 0.8rem; margin-bottom: 0.6rem; color: var(--text-dim); font-weight: 600; }
+.chart-box { position: relative; height: 260px; }
+.ov-note { font-size: 0.8rem; color: var(--yellow); margin-top: 1rem; }
+
+@media (max-width: 900px) {
+    .chart-wide { grid-column: span 1; }
+    .ov-main { padding: 0.8rem; }
+    .overview-page .header-status, .overview-page .header-vdivider { display: none; }
+}
