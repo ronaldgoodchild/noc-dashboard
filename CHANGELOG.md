@@ -3,6 +3,7 @@
 Reconstructed from the original development history (March - June 2026).
 
 ## [Unreleased]
+- Web edition: new **Overview** page (`/overview`, linked from the header) with KPI tiles (online / offline / maintenance / average response / total), a status doughnut, a "servers online over time" graph and a per-server response-time chart. Backed by a new `/api/overview` endpoint and a rolling history recorded on every scan (about 5 hours at the default 30 s interval; kept in memory, so it resets on restart). Charts use Chart.js 4.4.1 from the jsDelivr CDN with an integrity hash; the tiles still work offline.
 - Web edition: left navigation sidebar. One click filters the cards by group (with a live online/total count and a status dot), Favorites or Offline; click the active item again to clear. The ☰ button hides it, light and dark themes are supported, and it is hidden on narrow screens.
 - Web edition: the header now names the servers that are down under the Offline counter (up to 3, then "+N more", full list on hover) so you can find them without scanning every card.
 - Windows desktop EXE (2.5.0) published on the Releases page with SHA-256.

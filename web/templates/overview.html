@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📈 REGTeches NOC Overview</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/overview.css') }}">
+<!-- Chart.js is loaded from a CDN (pinned version + integrity hash). Without internet the KPI tiles still work. -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
+        integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4"
+        crossorigin="anonymous"></script>
+</head>
+<body class="overview-page">
+
+<!-- Header -->
+<div class="header" id="mainHeader">
+    <div class="header-brand">
+        <div class="header-signal">📡</div>
+        <div class="header-brand-text">
+            <h1>REGTECHES NOC</h1>
+            <div class="header-meta">
+                <span class="header-version">v{{ app_version }}</span>
+                <span class="header-sep">·</span>
+                <span class="header-author">Ronald Goodchild</span>
+                <span class="header-sep">·</span>
+                <span class="header-copy">© 2026 REGTeches</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-vdivider"></div>
+
+    <div class="header-status">
+        <div class="health-pill good" id="healthPill">
+            <span id="healthPillText">Checking…</span>
+        </div>
+    </div>
+
+    <div class="header-right">
+        <a href="/" class="btn btn-outline" style="text-decoration:none;">🖥️ Console</a>
+        <button class="btn btn-outline" id="themeToggle" onclick="toggleTheme()" title="Toggle light / dark mode">🌙</button>
+        <a href="/logout" class="btn btn-danger" style="text-decoration:none;">🚪 Logout</a>
+    </div>
+</div>
+
+<main class="ov-main">
+    <div class="ov-sub">
+        <h2>📈 Overview</h2>
+        <span class="ov-updated" id="lastUpdated">Loading…</span>
+    </div>
+
+    <!-- KPI tiles -->
+    <section class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Online</div><div class="kpi-val" id="kpi-online">—</div></div>
+        <div class="kpi"><div class="kpi-label">Offline</div><div class="kpi-val" id="kpi-offline">—</div></div>
+        <div class="kpi"><div class="kpi-label">Maintenance</div><div class="kpi-val" id="kpi-maint">—</div></div>
+        <div class="kpi"><div class="kpi-label">Avg response</div><div class="kpi-val" id="kpi-ms">—</div></div>
+        <div class="kpi"><div class="kpi-label">Total servers</div><div class="kpi-val" id="kpi-total">—</div></div>
+    </section>
+
+    <!-- Charts -->
+    <section class="chart-grid">
+        <div class="chart-card">
+            <h3>Status</h3>
+            <div class="chart-box"><canvas id="chStatus"></canvas></div>
+        </div>
+        <div class="chart-card chart-wide">
+            <h3>Servers online over time</h3>
+            <div class="chart-box"><canvas id="chOnline"></canvas></div>
+        </div>
+        <div class="chart-card chart-wide">
+            <h3>Response time (ms, slowest first)</h3>
+            <div class="chart-box"><canvas id="chResp"></canvas></div>
+        </div>
+    </section>
+    <p class="ov-note" id="chartNote" hidden>Charts need Chart.js from the jsDelivr CDN, which could not be loaded (offline?). The tiles above still update.</p>
+</main>
+
+<script>
+const SCAN_INTERVAL = {{ scan_interval }};
+</script>
+<script src="{{ url_for('static', filename='js/overview.js') }}"></script>
+</body>
+</html>

@@ -85,5 +85,100 @@ class TestNocWebTemplatesAndStatic(unittest.TestCase):
         self.assertIn("fetchStatus", js_dash_resp.get_data(as_text=True))
 
 
+class TestOverview(unittest.TestCase):
+    """Overview page and /api/overview, using temporary in-memory state only."""
+
+    def setUp(self):
+        noc_web.app.config["TESTING"] = True
+        self.client = noc_web.app.test_client()
+        self._saved = (noc_web.nodes, noc_web.node_statuses, set(noc_web.maintenance_ips),
+                       list(noc_web.metrics_history))
+        noc_web.nodes = [
+            {"name": "A", "ip": "192.0.2.1", "group": "Servers"},
+            {"name": "B", "ip": "192.0.2.2", "group": "Servers"},
+            {"name": "C", "ip": "192.0.2.3", "group": "Network"},
+            {"name": "D", "ip": "192.0.2.4", "group": "Network"},
+        ]
+        noc_web.node_statuses = {
+            "192.0.2.1": {"online": True,  "ms": 10},
+            "192.0.2.2": {"online": True,  "ms": 30},
+            "192.0.2.3": {"online": False, "ms": 0},
+            "192.0.2.4": {"online": False, "ms": 0},   # in maintenance below
+        }
+        noc_web.maintenance_ips = {"192.0.2.4"}
+        noc_web.metrics_history.clear()
+
+    def tearDown(self):
+        noc_web.nodes, noc_web.node_statuses = self._saved[0], self._saved[1]
+        noc_web.maintenance_ips = self._saved[2]
+        noc_web.metrics_history.clear()
+        noc_web.metrics_history.extend(self._saved[3])
+
+    def _login(self):
+        resp = self.client.post("/login", data={"username": noc_web.AUTH_USER, "password": noc_web.AUTH_PASS})
+        self.assertEqual(resp.status_code, 302)
+
+    def test_overview_requires_login(self):
+        for path in ("/overview", "/api/overview"):
+            resp = self.client.get(path)
+            self.assertEqual(resp.status_code, 302, path)
+            self.assertIn("/login", resp.headers["Location"])
+
+    def test_compute_overview_counts_and_health(self):
+        ov = noc_web._compute_overview()
+        self.assertEqual((ov["online"], ov["offline"], ov["maintenance"], ov["total"]), (2, 1, 1, 4))
+        self.assertEqual(ov["health"], "warn")
+        self.assertEqual(ov["avg_ms"], 20.0)   # only online servers count
+
+    def test_compute_overview_all_down_and_all_up(self):
+        noc_web.maintenance_ips = set()
+        for st in noc_web.node_statuses.values():
+            st["online"], st["ms"] = False, 0
+        ov = noc_web._compute_overview()
+        self.assertEqual((ov["health"], ov["avg_ms"]), ("bad", None))
+        for st in noc_web.node_statuses.values():
+            st["online"], st["ms"] = True, 5
+        self.assertEqual(noc_web._compute_overview()["health"], "good")
+
+    def test_record_metrics_snapshot_appends_a_point(self):
+        noc_web._record_metrics_snapshot()
+        self.assertEqual(len(noc_web.metrics_history), 1)
+        point = noc_web.metrics_history[-1]
+        self.assertEqual((point["online"], point["offline"], point["total"]), (2, 1, 4))
+        self.assertIn("ts", point)
+
+    def test_api_overview_payload(self):
+        noc_web._record_metrics_snapshot()
+        with self.client:
+            self._login()
+            resp = self.client.get("/api/overview")
+            self.assertEqual(resp.status_code, 200)
+            data = resp.get_json()
+        self.assertEqual(set(data), {"summary", "metrics_history", "nodes"})
+        self.assertEqual(data["summary"]["online"], 2)
+        self.assertEqual(data["summary"]["health"], "warn")
+        self.assertEqual(len(data["metrics_history"]), 1)
+        by_name = {n["name"]: n for n in data["nodes"]}
+        self.assertTrue(by_name["A"]["online"])
+        self.assertFalse(by_name["C"]["online"])
+        self.assertTrue(by_name["D"]["in_maintenance"])
+
+    def test_overview_page_renders_and_links(self):
+        with self.client:
+            self._login()
+            resp = self.client.get("/overview")
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn("/static/js/overview.js", html)
+            self.assertIn("/static/css/overview.css", html)
+            self.assertIn("chStatus", html)
+            # The dashboard links to it
+            self.assertIn('href="/overview"', self.client.get("/").get_data(as_text=True))
+        for static_path in ("/static/js/overview.js", "/static/css/overview.css"):
+            static_resp = self.client.get(static_path)
+            self.assertEqual(static_resp.status_code, 200, static_path)
+            static_resp.close()
+
+
 if __name__ == "__main__":
     unittest.main()
