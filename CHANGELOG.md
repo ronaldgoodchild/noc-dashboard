@@ -3,6 +3,7 @@
 Reconstructed from the original development history (March - June 2026).
 
 ## [Unreleased]
+- Web edition: left navigation sidebar. One click filters the cards by group (with a live online/total count and a status dot), Favorites or Offline; click the active item again to clear. The ☰ button hides it, light and dark themes are supported, and it is hidden on narrow screens.
 - Web edition: the header now names the servers that are down under the Offline counter (up to 3, then "+N more", full list on hover) so you can find them without scanning every card.
 - Windows desktop EXE (2.5.0) published on the Releases page with SHA-256.
 - Security: web edition no longer ships default `admin` / `changeme` credentials or a fixed session key - random ones are generated on first run and saved to `noc_settings.json`

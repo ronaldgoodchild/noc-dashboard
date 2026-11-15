@@ -11,6 +11,7 @@
     --yellow: #eab308;
     --orange: #f97316;
     --purple: #a855f7;
+    --sidebar-bg: #070b15;
 }
 /* ── Light mode ── */
 body.light {
@@ -26,6 +27,7 @@ body.light {
     --yellow: #ca8a04;
     --orange: #ea580c;
     --purple: #9333ea;
+    --sidebar-bg: #e6edf5;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -252,6 +254,46 @@ body {
     min-height: 0;    /* critical: allows flex child to shrink & scroll */
     overflow: hidden;
 }
+
+/* ── Left navigation sidebar ── */
+.sidebar {
+    width: 184px;
+    min-width: 0;
+    flex-shrink: 0;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--card-border);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.6rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+    transition: width 0.18s ease;
+}
+.sidebar.collapsed { width: 0; padding: 0; border: none; overflow: hidden; }
+.sb-title {
+    font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-dim); padding: 0.45rem 0.5rem 0.25rem; white-space: nowrap;
+}
+.sb-item {
+    display: flex; align-items: center; gap: 0.55rem;
+    padding: 0.45rem 0.55rem; border-radius: 7px;
+    font-size: 0.8rem; color: var(--text-dim);
+    cursor: pointer; user-select: none; white-space: nowrap;
+    transition: background 0.12s, color 0.12s;
+}
+.sb-item:hover { background: rgba(59,130,246,0.1); color: var(--text); }
+.sb-item.active { background: rgba(59,130,246,0.16); color: var(--accent); font-weight: 600; }
+.sb-item .sb-icon { font-size: 0.95rem; width: 1.15rem; text-align: center; flex-shrink: 0; }
+.sb-item .sb-label { overflow: hidden; text-overflow: ellipsis; }
+.sb-item .sb-count {
+    margin-left: auto; font-size: 0.68rem; color: var(--text-dim);
+    background: rgba(148,163,184,0.13); padding: 0.05rem 0.42rem; border-radius: 10px;
+}
+.sb-item.active .sb-count { color: var(--accent); background: rgba(59,130,246,0.18); }
+.sb-item .sb-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sb-divider { height: 1px; background: var(--card-border); margin: 0.45rem 0.3rem; }
+
 .groups-area {
     flex: 1;
     padding: 1rem;
@@ -575,6 +617,7 @@ body {
 /* Tablet — tighten spacing, hide log panel */
 @media (max-width: 900px) {
     .log-panel   { display: none; }
+    .sidebar, #sidebarToggle { display: none; }
     .groups-area { padding: 0.65rem; gap: 0.6rem; }
     .group-cards { gap: 0.45rem; padding: 0.55rem;
                    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); }
