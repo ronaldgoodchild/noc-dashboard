@@ -169,6 +169,18 @@ body {
     margin-top: 0.1rem;
     white-space: nowrap;
 }
+/* Names of the servers that are down, shown under the Offline counter */
+.hstat-down {
+    max-width: 240px;
+    margin-top: 0.1rem;
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: var(--red);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.hstat-down[hidden] { display: none; }
 
 /* Actions zone */
 .header-right {
