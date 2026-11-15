@@ -78,6 +78,24 @@ function renderSummary() {
         offlineEl.textContent = offline;
         offlineEl.style.color = offline === 0 ? 'var(--green)' : (offline < active ? 'var(--yellow)' : 'var(--red)');
     }
+
+    // Name the servers that are down (up to 3, then "+N more"; full list in the tooltip) so they are easy to find
+    const downEl = document.getElementById('hstat-offline-names');
+    if (downEl) {
+        const downNames = (state.nodes || [])
+            .filter(n => n.online === false && !n.in_maintenance)
+            .map(n => n.name);
+        if (downNames.length) {
+            const extra = downNames.length > 3 ? ` +${downNames.length - 3} more` : '';
+            downEl.textContent = downNames.slice(0, 3).join(', ') + extra;
+            downEl.title = 'Down: ' + downNames.join(', ');
+            downEl.hidden = false;
+        } else {
+            downEl.textContent = '';
+            downEl.title = '';
+            downEl.hidden = true;
+        }
+    }
     if (maintEl) {
         maintEl.textContent = s.maintenance || 0;
         maintEl.style.color = s.maintenance > 0 ? 'var(--accent)' : '#4a5568';
