@@ -4,6 +4,7 @@ let countdown = 30;
 let countdownTimer = null;
 let refreshTimer = null;
 let collapsedGroups = new Set();
+let currentFilter = { type: 'all', value: '' };   // all | group | favorites | offline
 
 // ─── API Helpers ─────────────────────────────────────────────────────────
 async function api(url, opts = {}) {
@@ -31,6 +32,7 @@ async function fetchStatus() {
     try {
         const data = await api('/api/status');
         state = data;
+        renderSidebar();
         renderCards();
         renderSummary();
         renderLog();
@@ -165,6 +167,10 @@ function renderGroups() {
             if (!hay.includes(search)) return false;
         }
         if (tagFilter && !(n.tags||[]).includes(tagFilter)) return false;
+        // Sidebar filter
+        if (currentFilter.type === 'group'     && (n.group || 'Ungrouped') !== currentFilter.value) return false;
+        if (currentFilter.type === 'favorites' && !n.favorite) return false;
+        if (currentFilter.type === 'offline'   && (n.online || n.in_maintenance)) return false;
         return true;
     });
 
@@ -206,6 +212,66 @@ function renderGroups() {
 }
 
 function renderCards() { renderGroups(); }
+
+// ─── Left Sidebar Navigation ──────────────────────────────────────────────
+function renderSidebar() {
+    const nav = document.getElementById('sidebarNav');
+    if (!nav) return;
+
+    const nodes = state.nodes || [];
+    const favCount = nodes.filter(n => n.favorite).length;
+    const offCount = nodes.filter(n => !n.online && !n.in_maintenance).length;
+
+    // Group order = first-seen
+    const groupMap = new Map();
+    nodes.forEach(n => {
+        const g = n.group || 'Ungrouped';
+        if (!groupMap.has(g)) groupMap.set(g, []);
+        groupMap.get(g).push(n);
+    });
+
+    // data-* attributes (not inline JS strings) so group names with quotes are safe
+    const item = (type, value, icon, label, count, opts = {}) => {
+        const active = currentFilter.type === type && currentFilter.value === value;
+        const dot = opts.dotColor
+            ? `<span class="sb-dot" style="background:${opts.dotColor};"></span>` : '';
+        const cnt = (count !== null && count !== undefined)
+            ? `<span class="sb-count" style="${opts.countColor ? 'color:' + opts.countColor : ''}">${count}</span>` : '';
+        return `<div class="sb-item${active ? ' active' : ''}" data-type="${type}" data-value="${escAttr(value)}">
+            <span class="sb-icon">${dot || icon}</span>
+            <span class="sb-label">${escHtml(label)}</span>${cnt}
+        </div>`;
+    };
+
+    let html = item('all', '', '🗂️', 'All servers', nodes.length);
+    [...groupMap.entries()].forEach(([g, gnodes]) => {
+        const online = gnodes.filter(n => n.online && !n.in_maintenance).length;
+        const dotColor = online === gnodes.length ? 'var(--green)' : online > 0 ? 'var(--yellow)' : 'var(--red)';
+        html += item('group', g, getGroupIcon(g), g, `${online}/${gnodes.length}`, { dotColor });
+    });
+    html += '<div class="sb-divider"></div>';
+    html += item('favorites', '', '⭐', 'Favorites', favCount);
+    html += item('offline', '', '⚠️', 'Offline', offCount, { countColor: offCount > 0 ? 'var(--red)' : '' });
+
+    nav.innerHTML = html;
+    nav.onclick = e => {
+        const el = e.target.closest('.sb-item');
+        if (el) setFilter(el.dataset.type, el.dataset.value);
+    };
+}
+
+function setFilter(type, value) {
+    // Clicking the active filter again clears it back to "all"
+    if (currentFilter.type === type && currentFilter.value === value && type !== 'all') {
+        currentFilter = { type: 'all', value: '' };
+    } else {
+        currentFilter = { type, value };
+    }
+    renderSidebar();
+    renderCards();
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
 
 // ─── Mini Card ────────────────────────────────────────────────────────────
 function renderMiniCard(n) {

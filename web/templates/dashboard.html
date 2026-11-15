@@ -78,6 +78,7 @@
 
 <!-- Toolbar -->
 <div class="toolbar">
+    <button class="btn btn-outline btn-sm" id="sidebarToggle" onclick="toggleSidebar()" title="Show / hide the navigation sidebar">☰</button>
     <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search servers, IPs, tags, descriptions..." oninput="filterCards()">
     <select class="tag-filter" id="tagFilter" onchange="filterCards()">
         <option value="">All Servers</option>
@@ -105,6 +106,11 @@
 
 <!-- Main Content -->
 <div class="main">
+    <!-- Left navigation sidebar: group list with health counts, Favorites, Offline -->
+    <aside class="sidebar" id="sidebar" aria-label="Navigation">
+        <div class="sb-title">Navigation</div>
+        <nav id="sidebarNav"></nav>
+    </aside>
     <div class="groups-area" id="cardsArea"></div>
     <div class="log-panel" id="logPanel">
         <div class="log-header">
