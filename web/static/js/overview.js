@@ -100,14 +100,13 @@ function buildCharts(data) {
     });
 
     // 3) Response time per server (online only, slowest first, top 15)
-    const timed = nodes.filter(n => n.online && !n.in_maintenance && typeof n.ms === 'number')
-                       .sort((a, b) => b.ms - a.ms).slice(0, 15);
+    const timed = slowestServers(nodes);
     charts.resp = new Chart(document.getElementById('chResp'), {
         type: 'bar',
         data: {
             labels: timed.map(n => n.name),
             datasets: [{ label: 'ms', data: timed.map(n => n.ms),
-                         backgroundColor: timed.map(n => n.ms > 200 ? red : n.ms > 50 ? yellow : green) }],
+                         backgroundColor: timed.map(n => msColour(n.ms)) }],
         },
         options: {
             maintainAspectRatio: false, indexAxis: 'y',
@@ -115,6 +114,38 @@ function buildCharts(data) {
             plugins: { legend: { display: false } },
         },
     });
+}
+
+// Online servers only, slowest first, top 15 (shared by the first draw and the in-place update)
+function slowestServers(nodes) {
+    return nodes.filter(n => n.online && !n.in_maintenance && typeof n.ms === 'number')
+                .sort((a, b) => b.ms - a.ms).slice(0, 15);
+}
+function msColour(ms) {
+    return ms > 200 ? cssVar('--red') : ms > 50 ? cssVar('--yellow') : cssVar('--green');
+}
+
+// Refresh the existing charts in place. Rebuilding them on every refresh made all three replay their
+// grow-in animation every few seconds; this only animates on the first draw.
+function updateCharts(data) {
+    const s = data.summary, hist = data.metrics_history || [];
+    charts.status.data.datasets[0].data = [s.online, s.offline, s.maintenance];
+
+    charts.online.data.labels = hist.map(h => h.ts);
+    charts.online.data.datasets[0].data = hist.map(h => h.online);
+    charts.online.data.datasets[1].data = hist.map(h => h.offline);
+
+    const timed = slowestServers(data.nodes || []);
+    charts.resp.data.labels = timed.map(n => n.name);
+    charts.resp.data.datasets[0].data = timed.map(n => n.ms);
+    charts.resp.data.datasets[0].backgroundColor = timed.map(n => msColour(n.ms));
+
+    Object.values(charts).forEach(c => c.update('none'));   // 'none' = no animation
+}
+
+function renderCharts(data) {
+    if (typeof Chart === 'undefined' || !charts.status) { buildCharts(data); return; }   // first draw (or no Chart.js)
+    updateCharts(data);
 }
 
 // ─── Data refresh ─────────────────────────────────────────────────────────
@@ -125,7 +156,7 @@ async function loadOverview() {
         const data = await resp.json();
         window._lastData = data;
         renderKpis(data.summary);
-        buildCharts(data);
+        renderCharts(data);
     } catch (e) {
         console.error('Overview fetch error:', e);
         const upd = document.getElementById('lastUpdated');
